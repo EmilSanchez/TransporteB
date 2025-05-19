@@ -274,6 +274,7 @@ function FOyRestricciones() {
 
     let FO = "Min Z = ";
     let restricciones = "";
+    let restricciones2 = "";
 
     let terminosFO = [];
     for (let i = 0; i < datos.origenes.length; i++) {
@@ -304,14 +305,16 @@ function FOyRestricciones() {
             if (i < datos.origenes.length - 1) restr += " + ";
         }
         restr += ` = ${datos.demanda[j]}`;
-        restricciones += restr + "<br>";
+        restricciones2 += restr + "<br>";
     }
 
     document.getElementById("datosGuardados2").innerHTML = `
         <h5>Función Objetivo</h5>
         <p>${FO}</p>
-        <h5>Restricciones</h5>
+        <h5>Restricciones de Oferta</h5>
         <p>${restricciones}</p>
+        <h5>Restricciones de Demanda</h5>
+        <p>${restricciones2}</p>
     `;
 }
 
