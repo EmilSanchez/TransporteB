@@ -10,7 +10,7 @@
 <body>
 
 <div class="container-fluid p-3 bg-primary text-white text-center">
-  <h1>Transporte de Buses Emil</h1>
+  <h1>Transporte</h1>
   <p>Pagina realizada como proyecto final de Investigacion de operaciones I</p>
 </div>
   
@@ -60,18 +60,23 @@
     </div>
     <div id="diagramaGenerado" class="mt-4 d-flex justify-content-center my-6">
       <div id="diagrama" style="position: relative; width: 800px; height: 650px; border: 1px solid #ccc;">
-        <!-- Canvas para las líneas -->
+        <!-- para las lineas -->
         <canvas id="canvasLineas" width="800" height="650" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
-        <!-- Aquí se colocarán dinámicamente los buses y las ciudades con JS -->
+        <!-- buses y ciudades con JS -->
       </div>
     </div>
 
     <hr>
 
-    <div class="d-flex justify-content-center my-4">
+    <div class="d-flex justify-content-center my-6">
       <button id="fo" type="button" class="btn btn-outline-secondary" onclick="FOyRestricciones()">Funcion Objetivo y Restricciones</button>
     </div>
-    <div id="datosGuardados" class="mt-4">
+    <div id="datosGuardados2" class="mt-4">
+    </div>
+
+    <hr>
+    <div class="d-flex justify-content-center my-6">
+      <button id="generarDiagrama" type="button" class="btn btn-outline-primary" onclick="">Esquina Nor-Oeste</button>
     </div>
 </div>
 

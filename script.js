@@ -15,13 +15,11 @@ function almacenarDatos() {
     destinos = [];
     let datosIncompletos = false;
 
-    // Validar que se hayan ingresado los datos
     if (isNaN(totalBuses) || isNaN(totalDestinos) || totalBuses <= 0 || totalDestinos <= 0) {
         alert("Por favor, ingrese un número válido de buses y destinos.");
         return;
     }
 
-    // Capturar datos de buses
     for (let i = 1; i <= totalBuses; i++) {
         let nombre = document.getElementById(`nombreBus${i}`).value.trim();
         let capacidad = parseInt(document.getElementById(`capacidadBus${i}`).value) || 0;
@@ -34,7 +32,7 @@ function almacenarDatos() {
         buses.push({ nombre, capacidad });
     }
 
-    // Capturar datos de destinos
+    
     if (!datosIncompletos) {
         for (let i = 1; i <= totalDestinos; i++) {
             let nombre = document.getElementById(`nombreDestino${i}`).value.trim();
@@ -103,24 +101,21 @@ function generarTablas() {
 
     let tablaHTML = `<table class="table table-bordered align-middle text-center">`;
 
-    // Cabecera
+    
     tablaHTML += `<thead><tr><th></th>`;
     for (let j = 0; j < totalDestinos; j++) {
         tablaHTML += `<th>${destinos[j].nombre}</th>`;
     }
     tablaHTML += `<th>Oferta</th></tr></thead><tbody>`;
 
-    // Filas de origen (buses)
     for (let i = 0; i < totalBuses; i++) {
         tablaHTML += `<tr><th>${buses[i].nombre}</th>`;
         for (let j = 0; j < totalDestinos; j++) {
             tablaHTML += `<td><input type="number" class="form-control form-control-sm" value=""/></td>`;
         }
-        // Oferta editable
         tablaHTML += `<td><input type="number" class="form-control form-control-sm" value=""/></td></tr>`;
     }
 
-    // Fila de demanda
     tablaHTML += `<tr><th>Demanda</th>`;
     for (let j = 0; j < totalDestinos; j++) {
         tablaHTML += `<td><input type="number" class="form-control form-control-sm" value=""/></td>`;
@@ -144,13 +139,11 @@ function obtenerDatosTabla() {
         demanda: []
     };
 
-    // Obtener nombres de destinos desde cabecera
     let headers = tabla.querySelectorAll("thead th");
     for (let j = 1; j < headers.length - 1; j++) {
         datos.destinos.push(headers[j].innerText);
     }
 
-    // Recorrer filas de buses
     for (let i = 0; i < filas.length - 1; i++) {
         let celdas = filas[i].querySelectorAll("td");
         let nombreOrigen = filas[i].querySelector("th").innerText;
@@ -188,7 +181,7 @@ function generarDiagrama(datos) {
     let ancho = 100;
     let alto = 100;
 
-    // Colocar buses (orígenes)
+    // buses
     datos.origenes.forEach((origen, i) => {
         let div = document.createElement("div");
         div.style.position = "absolute";
@@ -212,7 +205,7 @@ function generarDiagrama(datos) {
         contenedor.appendChild(div);
     });
 
-    // Colocar destinos (columnas)
+    // ciudades
     datos.destinos.forEach((destino, j) => {
         let div = document.createElement("div");
         div.style.position = "absolute";
@@ -236,7 +229,6 @@ function generarDiagrama(datos) {
         contenedor.appendChild(div);
     });
 
-    // Esperar un poco antes de dibujar líneas
     setTimeout(() => {
         datos.origenes.forEach((origen, i) => {
             datos.destinos.forEach((destino, j) => {
@@ -293,7 +285,7 @@ function FOyRestricciones() {
     }
     FO += terminosFO.join(" + ");
 
-    // Restricciones de oferta (por origen)
+    // Restricciones de oferta
     for (let i = 0; i < datos.origenes.length; i++) {
         let restr = "";
         for (let j = 0; j < datos.destinos.length; j++) {
@@ -304,7 +296,7 @@ function FOyRestricciones() {
         restricciones += restr + "<br>";
     }
 
-    // Restricciones de demanda (por destino)
+    // Restricciones de demanda
     for (let j = 0; j < datos.destinos.length; j++) {
         let restr = "";
         for (let i = 0; i < datos.origenes.length; i++) {
@@ -315,7 +307,7 @@ function FOyRestricciones() {
         restricciones += restr + "<br>";
     }
 
-    document.getElementById("datosGuardados").innerHTML = `
+    document.getElementById("datosGuardados2").innerHTML = `
         <h5>Función Objetivo</h5>
         <p>${FO}</p>
         <h5>Restricciones</h5>
