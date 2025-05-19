@@ -53,9 +53,29 @@
 
     </div>
 
-  </div>
+    <hr>
+
+    <div class="d-flex justify-content-center my-6">
+      <button id="generarDiagrama" type="button" class="btn btn-outline-primary" onclick="realizarDiagrama()">Realizar Diagrama</button>
+    </div>
+    <div id="diagramaGenerado" class="mt-4 d-flex justify-content-center my-6">
+      <div id="diagrama" style="position: relative; width: 800px; height: 600px; border: 1px solid #ccc;">
+        <!-- Canvas para las líneas -->
+        <canvas id="canvasLineas" width="800" height="600" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+        <!-- Aquí se colocarán dinámicamente los buses y las ciudades con JS -->
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="d-flex justify-content-center my-4">
+      <button id="fo" type="button" class="btn btn-outline-secondary" onclick="">Funcion Objetivo y Restricciones</button>
+    </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>
     

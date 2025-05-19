@@ -94,7 +94,10 @@ function actualizarDestinos(cantidad){
 
 
 function generarTablas() {
+    document.getElementById("buses").disabled = true;
+    document.getElementById("destinos").disabled = true;
     document.getElementById("generateTable").disabled = true;
+
     let totalBuses = buses.length;
     let totalDestinos = destinos.length;
 
@@ -111,21 +114,161 @@ function generarTablas() {
     for (let i = 0; i < totalBuses; i++) {
         tablaHTML += `<tr><th>${buses[i].nombre}</th>`;
         for (let j = 0; j < totalDestinos; j++) {
-            tablaHTML += `<td><input type="number" class="form-control form-control-sm" value="0"/></td>`;
+            tablaHTML += `<td><input type="number" class="form-control form-control-sm" value=""/></td>`;
         }
-        tablaHTML += `<td>${buses[i].capacidad}</td></tr>`;
+        // Oferta editable
+        tablaHTML += `<td><input type="number" class="form-control form-control-sm" value=""/></td></tr>`;
     }
 
     // Fila de demanda
     tablaHTML += `<tr><th>Demanda</th>`;
     for (let j = 0; j < totalDestinos; j++) {
-        tablaHTML += `<td><input type="number" class="form-control form-control-sm" value="0"/></td>`;
+        tablaHTML += `<td><input type="number" class="form-control form-control-sm" value=""/></td>`;
     }
     tablaHTML += `<td></td></tr>`;
 
     tablaHTML += `</tbody></table>`;
 
     document.getElementById("tablaGenerada").innerHTML = tablaHTML;
+    document.getElementById("nombreDestino").disabled = true;
+    document.getElementById("nombreBus").disabled = true;
+    document.getElementById("capacidadBus").disabled = true;
 }
+
+function obtenerDatosTabla() {
+    let tabla = document.querySelector("#tablaGenerada table");
+    let filas = tabla.querySelectorAll("tbody tr");
+    let datos = {
+        origenes: [],
+        destinos: [],
+        costos: [],
+        oferta: [],
+        demanda: []
+    };
+
+    // Obtener nombres de destinos desde cabecera
+    let headers = tabla.querySelectorAll("thead th");
+    for (let j = 1; j < headers.length - 1; j++) {
+        datos.destinos.push(headers[j].innerText);
+    }
+
+    // Recorrer filas de buses
+    for (let i = 0; i < filas.length - 1; i++) {
+        let celdas = filas[i].querySelectorAll("td");
+        let nombreOrigen = filas[i].querySelector("th").innerText;
+        datos.origenes.push(nombreOrigen);
+        let filaCostos = [];
+
+        // Costos a cada destino
+        for (let j = 0; j < datos.destinos.length; j++) {
+            let valor = celdas[j].querySelector("input").value;
+            filaCostos.push(Number(valor));
+        }
+
+        datos.costos.push(filaCostos);
+
+        // Oferta de origen
+        let oferta = celdas[celdas.length - 1].querySelector("input").value;
+        datos.oferta.push(Number(oferta));
+    }
+
+    // Demanda de cada destino
+    let ultimaFila = filas[filas.length - 1].querySelectorAll("td");
+    for (let j = 0; j < datos.destinos.length; j++) {
+        let demanda = ultimaFila[j].querySelector("input").value;
+        datos.demanda.push(Number(demanda));
+    }
+
+    console.log(datos);
+    return datos;
+}
+
+function generarDiagrama(datos) {
+    let contenedor = document.getElementById("diagrama");
+    contenedor.innerHTML = "";
+
+    let ancho = 100;
+    let alto = 100;
+
+    // Colocar origenes (buses) a la izquierda con su nombre
+    datos.origenes.forEach((origen, i) => {
+        let div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.left = "20px";
+        div.style.top = (50 + i * 120) + "px";
+        div.style.textAlign = "center";
+
+        let img = document.createElement("img");
+        img.src = "img/bus.png";
+        img.id = "origen" + i;
+        img.style.width = ancho + "px";
+        img.style.height = alto + "px";
+
+        let label = document.createElement("div");
+        label.innerText = origen;
+        label.style.fontWeight = "bold";
+        label.style.marginTop = "5px";
+
+        div.appendChild(img);
+        div.appendChild(label);
+        contenedor.appendChild(div);
+    });
+
+    // Colocar destinos (ciudades) a la derecha con su nombre
+    datos.destinos.forEach((destino, j) => {
+        let div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.right = "20px";
+        div.style.top = (50 + j * 120) + "px";
+        div.style.textAlign = "center";
+
+        let img = document.createElement("img");
+        img.src = "img/ciudad.png";
+        img.id = "destino" + j;
+        img.style.width = ancho + "px";
+        img.style.height = alto + "px";
+
+        let label = document.createElement("div");
+        label.innerText = destino;
+        label.style.fontWeight = "bold";
+        label.style.marginTop = "5px";
+
+        div.appendChild(img);
+        div.appendChild(label);
+        contenedor.appendChild(div);
+    });
+
+    // Una vez agregadas las imágenes, conectar con LeaderLine y colocar texto
+    setTimeout(() => {
+        datos.origenes.forEach((origen, i) => {
+            datos.destinos.forEach((destino, j) => {
+                let line = new LeaderLine(
+                    document.getElementById("origen" + i),
+                    document.getElementById("destino" + j),
+                    { color: 'blue', size: 4, startPlug: 'behind', endPlug: 'arrow' }
+                );
+
+                // Definir etiqueta según posición Xij (por ejemplo, C11 o X11)
+                // Puedes cambiar el formato de la etiqueta según lo que desees mostrar
+                let etiqueta = `X${i + 1}${j + 1}`; // Ejemplo: X11, X12, etc.
+                // Si prefieres C11, usa: let etiqueta = `C${i + 1}${j + 1}`;
+
+                // Crear etiqueta para la línea
+                let midLabel = LeaderLine.captionLabel(etiqueta, { color: 'black', outlineColor: 'white' });
+                line.addLabel(midLabel);
+            });
+        });
+    }, 100);
+}
+
+// Eliminado: No se debe crear una línea global aquí, las líneas se crean dinámicamente en generarDiagrama.
+
+function realizarDiagrama() {
+    let datos = obtenerDatosTabla();
+    generarDiagrama(datos);
+}
+
+
+
 
 
