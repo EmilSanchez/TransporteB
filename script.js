@@ -130,9 +130,7 @@ function generarTablas() {
     tablaHTML += `</tbody></table>`;
 
     document.getElementById("tablaGenerada").innerHTML = tablaHTML;
-    document.getElementById("nombreDestino").disabled = true;
-    document.getElementById("nombreBus").disabled = true;
-    document.getElementById("capacidadBus").disabled = true;
+    
 }
 
 function obtenerDatosTabla() {
@@ -190,12 +188,12 @@ function generarDiagrama(datos) {
     let ancho = 100;
     let alto = 100;
 
-    // Colocar origenes (buses) a la izquierda con su nombre
+    // Colocar buses (orígenes)
     datos.origenes.forEach((origen, i) => {
         let div = document.createElement("div");
         div.style.position = "absolute";
         div.style.left = "20px";
-        div.style.top = (50 + i * 120) + "px";
+        div.style.top = (50 + i * 150) + "px";
         div.style.textAlign = "center";
 
         let img = document.createElement("img");
@@ -214,12 +212,12 @@ function generarDiagrama(datos) {
         contenedor.appendChild(div);
     });
 
-    // Colocar destinos (ciudades) a la derecha con su nombre
+    // Colocar destinos (columnas)
     datos.destinos.forEach((destino, j) => {
         let div = document.createElement("div");
         div.style.position = "absolute";
         div.style.right = "20px";
-        div.style.top = (50 + j * 120) + "px";
+        div.style.top = (50 + j * 150) + "px";
         div.style.textAlign = "center";
 
         let img = document.createElement("img");
@@ -238,35 +236,93 @@ function generarDiagrama(datos) {
         contenedor.appendChild(div);
     });
 
-    // Una vez agregadas las imágenes, conectar con LeaderLine y colocar texto
+    // Esperar un poco antes de dibujar líneas
     setTimeout(() => {
         datos.origenes.forEach((origen, i) => {
             datos.destinos.forEach((destino, j) => {
-                let line = new LeaderLine(
-                    document.getElementById("origen" + i),
-                    document.getElementById("destino" + j),
-                    { color: 'blue', size: 4, startPlug: 'behind', endPlug: 'arrow' }
-                );
+                const origenEl = document.getElementById("origen" + i);
+                const destinoEl = document.getElementById("destino" + j);
 
-                // Definir etiqueta según posición Xij (por ejemplo, C11 o X11)
-                // Puedes cambiar el formato de la etiqueta según lo que desees mostrar
-                let etiqueta = `X${i + 1}${j + 1}`; // Ejemplo: X11, X12, etc.
-                // Si prefieres C11, usa: let etiqueta = `C${i + 1}${j + 1}`;
+                if (!origenEl || !destinoEl) return;
 
-                // Crear etiqueta para la línea
-                let midLabel = LeaderLine.captionLabel(etiqueta, { color: 'black', outlineColor: 'white' });
-                line.addLabel(midLabel);
+                let line = new LeaderLine(origenEl, destinoEl, {
+                    color: 'blue',
+                    size: 4,
+                    startPlug: 'behind',
+                    endPlug: 'arrow'
+                });
+
+                let xij = `X${i + 1}${j + 1}`;
+                let labelX = LeaderLine.captionLabel(xij, { color: 'black' });
+                line.setOptions({ middleLabel: labelX });
+
+                let cij = datos.costos[i][j];
+                let labelC = LeaderLine.captionLabel(`C${i + 1}${j + 1}=${cij}`, {
+                    color: 'red',
+                    outlineColor: 'white',
+                    fontSize: '12px'
+                });
+
+                line.addLabel(labelC, { position: 'middle', offset: [0, 20] });
             });
         });
-    }, 100);
+    }, 500);
 }
 
-// Eliminado: No se debe crear una línea global aquí, las líneas se crean dinámicamente en generarDiagrama.
 
 function realizarDiagrama() {
     let datos = obtenerDatosTabla();
     generarDiagrama(datos);
 }
+
+function FOyRestricciones() {
+    const datos = obtenerDatosTabla();
+
+    if (!datos) return;
+
+    let FO = "Min Z = ";
+    let restricciones = "";
+
+    let terminosFO = [];
+    for (let i = 0; i < datos.origenes.length; i++) {
+        for (let j = 0; j < datos.destinos.length; j++) {
+            const xij = `X${i + 1}${j + 1}`;
+            const cij = datos.costos[i][j];
+            terminosFO.push(`${cij}(${xij})`);
+        }
+    }
+    FO += terminosFO.join(" + ");
+
+    // Restricciones de oferta (por origen)
+    for (let i = 0; i < datos.origenes.length; i++) {
+        let restr = "";
+        for (let j = 0; j < datos.destinos.length; j++) {
+            restr += `X${i + 1}${j + 1}`;
+            if (j < datos.destinos.length - 1) restr += " + ";
+        }
+        restr += ` ≤ ${datos.oferta[i]}`;
+        restricciones += restr + "<br>";
+    }
+
+    // Restricciones de demanda (por destino)
+    for (let j = 0; j < datos.destinos.length; j++) {
+        let restr = "";
+        for (let i = 0; i < datos.origenes.length; i++) {
+            restr += `X${i + 1}${j + 1}`;
+            if (i < datos.origenes.length - 1) restr += " + ";
+        }
+        restr += ` = ${datos.demanda[j]}`;
+        restricciones += restr + "<br>";
+    }
+
+    document.getElementById("datosGuardados").innerHTML = `
+        <h5>Función Objetivo</h5>
+        <p>${FO}</p>
+        <h5>Restricciones</h5>
+        <p>${restricciones}</p>
+    `;
+}
+
 
 
 
