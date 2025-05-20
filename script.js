@@ -241,12 +241,12 @@ function generarDiagrama(datos) {
                     color: 'blue',
                     size: 4,
                     startPlug: 'behind',
-                    endPlug: 'arrow'
+                    endPlug: 'arrow',
+                    path: 'arc' // Separa mejor las líneas
                 });
 
                 let xij = `X${i + 1}${j + 1}`;
                 let labelX = LeaderLine.captionLabel(xij, { color: 'black' });
-                line.setOptions({ middleLabel: labelX });
 
                 let cij = datos.costos[i][j];
                 let labelC = LeaderLine.captionLabel(`C${i + 1}${j + 1}=${cij}`, {
@@ -255,10 +255,22 @@ function generarDiagrama(datos) {
                     fontSize: '12px'
                 });
 
-                line.addLabel(labelC, { position: 'middle', offset: [0, 20] });
+                line.setOptions({
+                    startLabel: labelX,
+                    startLabelOptions: { offset: [-120, -10] }, // `Xij` más separado hacia la izquierda
+                    endLabel: labelC,
+                    endLabelOptions: { offset: [120, 10] } // `Cij` más separado hacia la derecha
+                });
             });
         });
     }, 500);
+
+
+
+
+
+
+
 }
 
 
