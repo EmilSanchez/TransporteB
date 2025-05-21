@@ -55,15 +55,14 @@
 
     <hr>
 
-    <div class="d-flex justify-content-center my-6">
-      <button id="generarDiagrama" type="button" class="btn btn-outline-primary" onclick="realizarDiagrama()">Realizar Diagrama</button>
+    <div class="d-flex justify-content-center my-4">
+      <button id="generarDiagrama" type="button" class="btn btn-outline-primary" onclick="generateDiagram()">
+          Realizar Diagrama
+      </button>
     </div>
-    <div id="diagramaGenerado" class="mt-4 d-flex justify-content-center my-6">
-      <div id="diagrama" style="position: relative; width: 800px; height: 650px; border: 1px solid #ccc;">
-        <!-- para las lineas -->
-        <canvas id="canvasLineas" width="800" height="650" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
-        <!-- buses y ciudades con JS -->
-      </div>
+
+    <div id="diagram-container">
+      <svg id="diagram-svg" style="width: 100%; height: 0px"></svg>
     </div>
 
     <hr>
@@ -75,6 +74,7 @@
     </div>
 
     <hr>
+
     <div class="d-flex justify-content-center my-6">
       <button id="generarDiagrama" type="button" class="btn btn-outline-primary" onclick="">Esquina Nor-Oeste</button>
     </div>

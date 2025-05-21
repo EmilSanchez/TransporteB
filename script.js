@@ -1,60 +1,48 @@
-const busesValue = document.getElementById('busesValue');
-const busesInputs = document.getElementById('busesInputs');
+const capitals = [
+    "Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena", "Cúcuta", "Bucaramanga", "Pereira",
+    "Manizales", "Ibagué", "Santa Marta", "Villavicencio", "Pasto", "Montería", "Armenia", "Neiva",
+    "Sincelejo", "Valledupar", "Quibdó", "Riohacha", "Florencia", "San Andrés", "Mocoa", "Yopal",
+    "Popayán", "Tunja", "Leticia", "Arauca", "Inírida"
+];
 
-const destinosValue = document.getElementById('destinosValue');
-const destinosInputs = document.getElementById('destinosInputs');
+const busNames = [
+    "Expreso Bolivariano", "Copetran", "Expreso Brasilia", "Rápido Ochoa", "Flota Magdalena", "Coomotor", "Cootranshuila", "Berlinas del Fonce",
+    "Omega", "Expreso Palmira", "Flota La Macarena", "Flota Occidental", "Expreso Palmira", "Expreso San Gil", "Cootransbol", "Expreso Paz del Río",
+    "Expreso Sideral", "Expreso Gaviota", "Expreso Palmira", "Expreso Palmira"
+];
 
-let buses = [];
-let destinos = [];
 
-function almacenarDatos() {
-    let totalBuses = parseInt(document.getElementById("buses").value);
-    let totalDestinos = parseInt(document.getElementById("destinos").value);
+function bus() {
+    // Genera un bus aleatorio que no se repita en llamadas sucesivas
+    const usedBuses = bus.usedBuses || new Set();
 
-    buses = [];
-    destinos = [];
-    let datosIncompletos = false;
-
-    if (isNaN(totalBuses) || isNaN(totalDestinos) || totalBuses <= 0 || totalDestinos <= 0) {
-        alert("Por favor, ingrese un número válido de buses y destinos.");
-        return;
+    let availableBuses = busNames.filter(name => !usedBuses.has(name));
+    if (availableBuses.length === 0) {
+        usedBuses.clear();
+        availableBuses = [...busNames];
     }
-
-    for (let i = 1; i <= totalBuses; i++) {
-        let nombre = document.getElementById(`nombreBus${i}`).value.trim();
-        let capacidad = parseInt(document.getElementById(`capacidadBus${i}`).value) || 0;
-
-        if (!nombre || capacidad <= 0) {
-            datosIncompletos = true;
-            break;
-        }
-
-        buses.push({ nombre, capacidad });
-    }
-
-    
-    if (!datosIncompletos) {
-        for (let i = 1; i <= totalDestinos; i++) {
-            let nombre = document.getElementById(`nombreDestino${i}`).value.trim();
-            if (!nombre) {
-                datosIncompletos = true;
-                break;
-            }
-            destinos.push({ nombre });
-        }
-    }
-
-    if (datosIncompletos) {
-        alert("Por favor, complete todos los campos de buses y destinos antes de guardar.");
-        return;
-    }
-
-    console.log("Buses:", buses);
-    console.log("Destinos:", destinos);
-
-    generarTablas()
+    const randomBus = availableBuses.sort(() => 0.5 - Math.random())[0];
+    usedBuses.add(randomBus);
+    bus.usedBuses = usedBuses;
+    return randomBus;
 }
 
+function ciudad() {
+    // Mantener un conjunto de ciudades ya usadas
+    const usedCities = ciudad.usedCities || new Set();
+
+    // Filtrar las ciudades que no han sido usadas
+    let availableCities = capitals.filter(name => !usedCities.has(name));
+    if (availableCities.length === 0) {
+        usedCities.clear();
+        availableCities = [...capitals];
+    }
+    // Seleccionar una ciudad aleatoria disponible
+    const randomCity = availableCities[Math.floor(Math.random() * availableCities.length)];
+    usedCities.add(randomCity);
+    ciudad.usedCities = usedCities;
+    return randomCity;
+}
 
 function actualizarBuses(cantidad){
     busesValue.innerText = cantidad;
@@ -65,8 +53,7 @@ function actualizarBuses(cantidad){
         div.className = 'mb-2';
 
         div.innerHTML = `
-            <input type="text" id="nombreBus${i}" placeholder="Nombre del Bus ${i}" class="form-control d-inline-block  mx-0" style="width: 58%;"/>
-            <input type="number" id="capacidadBus${i}" placeholder="Capacidad" class="form-control d-inline-block  mx-0" max="40" style="width: 40%;"/>
+            <input type="text" id="nombreBus${i}" placeholder="Nombre del Bus ${i}" class="form-control d-inline-block  mx-0" style="width: 90%;" value="${bus()}" disabled/>
         `;
 
         busesInputs.appendChild(div);
@@ -83,12 +70,53 @@ function actualizarDestinos(cantidad){
         div.className = 'mb-2';
 
         div.innerHTML = `
-            <input type="text" id="nombreDestino${i}" placeholder="Nombre del Destino ${i}" class="form-control d-inline-block mx-0" />
+            <input type="text" id="nombreDestino${i}" placeholder="Nombre del Destino ${i}" class="form-control d-inline-block mx-0" value="${ciudad()}" disabled/>
         `;
 
         destinosInputs.appendChild(div);
     }
 }
+
+
+const busesValue = document.getElementById('busesValue');
+const busesInputs = document.getElementById('busesInputs');
+
+const destinosValue = document.getElementById('destinosValue');
+const destinosInputs = document.getElementById('destinosInputs');
+
+let buses = [];
+let destinos = [];
+
+function almacenarDatos() {
+    let totalBuses = parseInt(document.getElementById("buses").value);
+    let totalDestinos = parseInt(document.getElementById("destinos").value);
+
+    buses = [];
+    destinos = [];
+
+    if (isNaN(totalBuses) || isNaN(totalDestinos) || totalBuses <= 0 || totalDestinos <= 0) {
+        alert("Por favor, ingrese un número válido de buses y destinos.");
+        return;
+    }
+
+    // Leer nombres de buses desde inputs generados
+    for (let i = 1; i <= totalBuses; i++) {
+        let nombreBus = document.getElementById(`nombreBus${i}`).value;
+        buses.push({ nombre: nombreBus });
+    }
+
+    // Leer nombres de destinos desde inputs generados
+    for (let i = 1; i <= totalDestinos; i++) {
+        let nombreDestino = document.getElementById(`nombreDestino${i}`).value;
+        destinos.push({ nombre: nombreDestino });
+    }
+
+    console.log("Buses:", buses);
+    console.log("Destinos:", destinos);
+
+    generarTablas();
+}
+
 
 
 function generarTablas() {
@@ -174,110 +202,174 @@ function obtenerDatosTabla() {
     return datos;
 }
 
-function generarDiagrama(datos) {
-    let contenedor = document.getElementById("diagrama");
-    contenedor.innerHTML = "";
+// Funciones de Daniel
 
-    let ancho = 100;
-    let alto = 100;
+function generateDiagram() {
 
-    // buses
-    datos.origenes.forEach((origen, i) => {
-        let div = document.createElement("div");
-        div.style.position = "absolute";
-        div.style.left = "20px";
-        div.style.top = (50 + i * 150) + "px";
-        div.style.textAlign = "center";
+    // Definir colores para las lineas
+    const busColors = ["#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#B10DC9", "#FFDC00"];
 
-        let img = document.createElement("img");
-        img.src = "img/bus.png";
-        img.id = "origen" + i;
-        img.style.width = ancho + "px";
-        img.style.height = alto + "px";
+    const numSourcesInput = document.getElementById('buses');
+    const numDestInput = document.getElementById('destinos');
+    if (!numSourcesInput || !numDestInput) {
+        alert("Faltan los campos de número de buses o ciudades en el HTML (IDs: 'num-sources', 'num-dest').");
+        return;
+    }
+    
+    const numSources = parseInt(numSourcesInput.value);
+    const numDest = parseInt(numDestInput.value);
+    const cities = capitals.sort(() => 0.5 - Math.random()).slice(0, numDest);
+    currentCities = cities;
 
-        let label = document.createElement("div");
-        label.innerText = origen;
-        label.style.fontWeight = "bold";
-        label.style.marginTop = "5px";
+    if (numSources > 4 || numDest > 4) {
+        alert("como máximo 4 buses y 4 ciudades");
+        clearInput('num-sources', 'num-dest');
+        return;
+    }
+    if (numSources < 1 || numDest < 1) {
+        alert("debe haber al menos 1 bus y 1 ciudad");
+        clearInput('num-sources', 'num-dest');
+        return;
+    }
 
-        div.appendChild(img);
-        div.appendChild(label);
-        contenedor.appendChild(div);
+    const svg = document.getElementById('diagram-svg');
+    svg.innerHTML = '';
+
+    // Ajustes clave -------------------------------------------------
+    const element_spacing = 300; // Más espacio entre elementos
+    const horizontalMargin = 80; // Margen lateral aumentado
+    const baseHeight = 200; // Altura base adicional
+    
+    // Calcular dimensiones dinámicas
+    const maxElements = Math.max(numSources, numDest);
+    const diagramWidth = 1200; // Ancho aumentado
+    const diagramHeight = (maxElements * element_spacing) + baseHeight;
+    
+    svg.style.minHeight = `${diagramHeight}px`;
+    svg.setAttribute('viewBox', `0 0 ${diagramWidth} ${diagramHeight}`);
+
+    // Definir marcador de flecha
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    marker.setAttribute('id', 'arrow');
+    marker.setAttribute('viewBox', '0 0 10 10');
+    marker.setAttribute('refX', '9');
+    marker.setAttribute('refY', '5');
+    marker.setAttribute('markerWidth', '6');
+    marker.setAttribute('markerHeight', '6');
+    marker.setAttribute('orient', 'auto');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M0,0 L10,5 L0,10 Z');
+    path.setAttribute('fill', 'black');
+    marker.appendChild(path);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+
+    // Posicionar elementos
+    const busPositions = Array.from({length: numSources}, (_, i) => ({
+        x: horizontalMargin,
+        y: baseHeight/2 + i * element_spacing
+    }));
+    
+    const cityPositions = cities.map((_, i) => ({
+        x: diagramWidth - horizontalMargin,
+        y: baseHeight/2 + i * element_spacing
+    }));
+
+    // Dibujar buses
+    busPositions.forEach((pos, i) => {
+        const bus = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        bus.setAttribute('href', 'img/bus.png'); //imagen 
+        bus.setAttribute('x', pos.x - 35); // Centrar icono
+        bus.setAttribute('y', pos.y - 60);
+        bus.setAttribute('width', '100');
+        bus.setAttribute('height', '100');
+        svg.appendChild(bus);
+        
+        // Texto
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        // Mostrar el mismo nombre de bus que aparece en la tabla generada
+        text.setAttribute('x', pos.x - 0);
+        text.setAttribute('y', pos.y - 40);
+        text.textContent = `Bus ${i + 1}`;
+        svg.appendChild(text);
     });
 
-    // ciudades
-    datos.destinos.forEach((destino, j) => {
-        let div = document.createElement("div");
-        div.style.position = "absolute";
-        div.style.right = "20px";
-        div.style.top = (50 + j * 150) + "px";
-        div.style.textAlign = "center";
+    // Dibujar ciudades
+    cityPositions.forEach((pos, i) => {
+        // Ícono de ciudad
+        const city = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        city.setAttribute('href', 'img/ciudad.png'); // Asegurar que esta imagen existe
+        city.setAttribute('x', pos.x - 30); // Centrar icono
+        city.setAttribute('y', pos.y - 60);
+        city.setAttribute('width', '100');
+        city.setAttribute('height', '100');
+        svg.appendChild(city);
 
-        let img = document.createElement("img");
-        img.src = "img/ciudad.png";
-        img.id = "destino" + j;
-        img.style.width = ancho + "px";
-        img.style.height = alto + "px";
-
-        let label = document.createElement("div");
-        label.innerText = destino;
-        label.style.fontWeight = "bold";
-        label.style.marginTop = "5px";
-
-        div.appendChild(img);
-        div.appendChild(label);
-        contenedor.appendChild(div);
+        // Nombre de la ciudad
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos.x - 0);
+        text.setAttribute('y', pos.y - 55);
+        text.textContent = cities[i];
+        svg.appendChild(text);
     });
 
-    setTimeout(() => {
-        datos.origenes.forEach((origen, i) => {
-            datos.destinos.forEach((destino, j) => {
-                const origenEl = document.getElementById("origen" + i);
-                const destinoEl = document.getElementById("destino" + j);
+    const labelOffset = 40; // Distancia desde la línea
+    const angleOffset = 25; // Ángulo para evitar colisiones
 
-                if (!origenEl || !destinoEl) return;
+    // Dibujar conexiones
+    busPositions.forEach((busPos, busIdx) => {
+        cityPositions.forEach((cityPos, cityIdx) => {
+            // Línea
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', busPos.x + 50);
+            line.setAttribute('y1', busPos.y);
+            line.setAttribute('x2', cityPos.x);
+            line.setAttribute('y2', cityPos.y);
+            line.setAttribute('class', 'line');
+            line.setAttribute('stroke', busColors[busIdx % busColors.length]);
+            svg.appendChild(line);
 
-                let line = new LeaderLine(origenEl, destinoEl, {
-                    color: 'blue',
-                    size: 4,
-                    startPlug: 'behind',
-                    endPlug: 'arrow',
-                    path: 'arc' // Separa mejor las líneas
-                });
+            // calcular dirección de la línea
+            const dx = cityPos.x - busPos.x;
+            const dy = cityPos.y - busPos.y;
+            const angle = Math.atan2(dy, dx);
 
-                let xij = `X${i + 1}${j + 1}`;
-                let labelX = LeaderLine.captionLabel(xij, { color: 'black' });
+            // Posicionamiento inteligente de etiquetas
+            const xijPosition = {
+                x: busPos.x + dx * 0.25 + Math.cos(angle + angleOffset) * labelOffset,
+                y: busPos.y + dy * 0.25 + Math.sin(angle + angleOffset) * labelOffset
+            };
 
-                let cij = datos.costos[i][j];
-                let labelC = LeaderLine.captionLabel(`C${i + 1}${j + 1}=${cij}`, {
-                    color: 'red',
-                    outlineColor: 'white',
-                    fontSize: '12px'
-                });
+            const cijPosition = {
+                x: busPos.x + dx * 0.75 + Math.cos(angle - angleOffset) * labelOffset,
+                y: busPos.y + dy * 0.75 + Math.sin(angle - angleOffset) * labelOffset
+            };
 
-                line.setOptions({
-                    startLabel: labelX,
-                    startLabelOptions: { offset: [-120, -10] }, // `Xij` más separado hacia la izquierda
-                    endLabel: labelC,
-                    endLabelOptions: { offset: [120, 10] } // `Cij` más separado hacia la derecha
-                });
-            });
+            // Crear etiquetas con posición calculada
+            const xId = `x${busIdx+1}${cityIdx+1}`;
+            const cId = `c${busIdx+1}${cityIdx+1}`;
+
+            // Modificar las llamadas a createLabel para incluir los valores iniciales
+            createLabel(svg, `${xId}`, xijPosition, busColors[busIdx % busColors.length]);
+            createLabel(svg, `${cId}`, cijPosition, busColors[busIdx % busColors.length]);
+
+            // Si necesitas almacenar valores para esta ruta, puedes hacerlo aquí si es necesario
         });
-    }, 500);
-
-
-
-
-
-
-
+    });
+    
+    function createLabel(svg, text, position, color) {
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', position.x);
+        label.setAttribute('y', position.y);
+        label.textContent = text;
+        label.setAttribute('fill', color);
+        label.setAttribute('class', 'diagram-label');
+        svg.appendChild(label);
+    }
 }
 
-
-function realizarDiagrama() {
-    let datos = obtenerDatosTabla();
-    generarDiagrama(datos);
-}
+// fin funciones de daniel
 
 function FOyRestricciones() {
     const datos = obtenerDatosTabla();
