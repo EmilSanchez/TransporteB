@@ -2,13 +2,14 @@ const capitals = [
     "Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena", "Cúcuta", "Bucaramanga", "Pereira",
     "Manizales", "Ibagué", "Santa Marta", "Villavicencio", "Pasto", "Montería", "Armenia", "Neiva",
     "Sincelejo", "Valledupar", "Quibdó", "Riohacha", "Florencia", "San Andrés", "Mocoa", "Yopal",
-    "Popayán", "Tunja", "Leticia", "Arauca", "Inírida"
+    "Popayán", "Tunja", "Leticia", "Arauca", "Inírida", "Aguachica", "Tumaco",
+    "Barrancabermeja", "Bello", "Soledad", "Palmira", "Tuluá", "Cartago", "Sogamoso"
 ];
 
 const busNames = [
-    "Expreso Bolivariano", "Copetran", "Expreso Brasilia", "Rápido Ochoa", "Flota Magdalena", "Coomotor", "Cootranshuila", "Berlinas del Fonce",
-    "Omega", "Expreso Palmira", "Flota La Macarena", "Flota Occidental", "Expreso Palmira", "Expreso San Gil", "Cootransbol", "Expreso Paz del Río",
-    "Expreso Sideral", "Expreso Gaviota", "Expreso Palmira", "Expreso Palmira"
+    "Bolivariano", "Copetran", "Brasilia", "Rápido Ochoa", "Flota Magdalena", "Coomotor", "Cootranshuila",
+    "Omega", "Palmira", "Flota La Macarena", "Flota Occidental", "San Gil", "Cootransbol", "Paz del Río",
+    "Sideral", "Gaviota", 
 ];
 
 
@@ -80,7 +81,7 @@ function actualizarDestinos(cantidad){
 
 const busesValue = document.getElementById('busesValue');
 const busesInputs = document.getElementById('busesInputs');
-
+ 
 const destinosValue = document.getElementById('destinosValue');
 const destinosInputs = document.getElementById('destinosInputs');
 
@@ -119,7 +120,9 @@ function almacenarDatos() {
 
 
 
+
 function generarTablas() {
+    
     document.getElementById("buses").disabled = true;
     document.getElementById("destinos").disabled = true;
     document.getElementById("generateTable").disabled = true;
@@ -205,6 +208,7 @@ function obtenerDatosTabla() {
 // Funciones de Daniel
 
 function generateDiagram() {
+    
 
     // Definir colores para las lineas
     const busColors = ["#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#B10DC9", "#FFDC00"];
@@ -232,6 +236,14 @@ function generateDiagram() {
         return;
     }
 
+    const tabla = document.querySelector("#tablaGenerada table");
+    if (!tabla) {
+        alert("Debes generar la tabla primero");
+        return;
+    }
+
+    document.getElementById("generarDiagrama").disabled = true;
+
     const svg = document.getElementById('diagram-svg');
     svg.innerHTML = '';
 
@@ -242,8 +254,11 @@ function generateDiagram() {
     
     // Calcular dimensiones dinámicas
     const maxElements = Math.max(numSources, numDest);
+    //console.log("elementos del diagrama"+ maxElements);
     const diagramWidth = 1200; // Ancho aumentado
-    const diagramHeight = (maxElements * element_spacing) + baseHeight;
+    //console.log("ancho del diagrama "+diagramWidth);
+    const diagramHeight = (maxElements * element_spacing) + baseHeight - 300;
+    //console.log("alto del diagrama "+diagramHeight);
     
     svg.style.minHeight = `${diagramHeight}px`;
     svg.setAttribute('viewBox', `0 0 ${diagramWidth} ${diagramHeight}`);
@@ -289,9 +304,9 @@ function generateDiagram() {
         // Texto
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         // Mostrar el mismo nombre de bus que aparece en la tabla generada
-        text.setAttribute('x', pos.x - 0);
+        text.setAttribute('x', pos.x - 20);
         text.setAttribute('y', pos.y - 40);
-        text.textContent = `Bus ${i + 1}`;
+        text.textContent = `${buses[i].nombre}`; // Mostrar el nombre del bus
         svg.appendChild(text);
     });
 
@@ -310,7 +325,7 @@ function generateDiagram() {
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         text.setAttribute('x', pos.x - 0);
         text.setAttribute('y', pos.y - 55);
-        text.textContent = cities[i];
+        text.textContent = `${destinos[i].nombre}`; // Mostrar el nombre de la ciudad
         svg.appendChild(text);
     });
 
@@ -369,12 +384,13 @@ function generateDiagram() {
     }
 }
 
-// fin funciones de daniel
-
 function FOyRestricciones() {
     const datos = obtenerDatosTabla();
 
-    if (!datos) return;
+    if (!datos) {
+        alert("Por favor, completa la tabla antes de continuar.");
+        return;
+    }
 
     let FO = "Min Z = ";
     let restricciones = "";
@@ -420,6 +436,11 @@ function FOyRestricciones() {
         <h5>Restricciones de Demanda</h5>
         <p>${restricciones2}</p>
     `;
+}
+
+function EsquinaNoroeste() {
+    alert("Método de Esquina Noroeste aun no se a implementado");
+
 }
 
 
