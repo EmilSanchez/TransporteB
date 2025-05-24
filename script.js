@@ -61,7 +61,6 @@ function actualizarBuses(cantidad){
     }
 }
 
-
 function actualizarDestinos(cantidad){
     destinosValue.innerText = cantidad;
     destinosInputs.innerHTML = '';
@@ -77,7 +76,6 @@ function actualizarDestinos(cantidad){
         destinosInputs.appendChild(div);
     }
 }
-
 
 const busesValue = document.getElementById('busesValue');
 const busesInputs = document.getElementById('busesInputs');
@@ -117,9 +115,6 @@ function almacenarDatos() {
 
     generarTablas();
 }
-
-
-
 
 function generarTablas() {
     
@@ -205,9 +200,29 @@ function obtenerDatosTabla() {
     return datos;
 }
 
-// Funciones de Daniel
-
 function generateDiagram() {
+
+    //traer oferta y demanda para validar que no sean 0 y sumen lo mismo
+    // Obtener datos de la tabla
+    const datos = obtenerDatosTabla();
+    if (!datos) {
+        alert("Por favor, completa la tabla antes de continuar.");
+        return;
+    }
+
+    // Validar que ninguna oferta o demanda sea 0 o negativa
+    if (datos.oferta.some(o => o <= 0) || datos.demanda.some(d => d <= 0)) {
+        alert("Todas las ofertas y demandas deben ser mayores que 0.");
+        return;
+    }
+
+    // Validar que la suma de oferta y demanda sea igual
+    const sumaOferta = datos.oferta.reduce((a, b) => a + b, 0);
+    const sumaDemanda = datos.demanda.reduce((a, b) => a + b, 0);
+    if (sumaOferta !== sumaDemanda) {
+        alert("La suma de la oferta debe ser igual a la suma de la demanda.");
+        return;
+    }
     
 
     // Definir colores para las lineas
@@ -438,13 +453,520 @@ function FOyRestricciones() {
     `;
 }
 
-function EsquinaNoroeste() {
-    alert("Método de Esquina Noroeste aun no se a implementado");
+// Reemplaza la función EsquinaNoroeste() existente con esta implementación completa:
 
+function EsquinaNoroeste() {
+    // Obtener datos de la tabla
+    const datos = obtenerDatosTabla();
+    if (!datos) {
+        alert("Por favor, completa la tabla antes de continuar.");
+        return;
+    }
+
+    // Validar que ninguna oferta o demanda sea 0 o negativa
+    if (datos.oferta.some(o => o <= 0) || datos.demanda.some(d => d <= 0)) {
+        alert("Todas las ofertas y demandas deben ser mayores que 0.");
+        return;
+    }
+
+    // Validar que la suma de oferta y demanda sea igual
+    const sumaOferta = datos.oferta.reduce((a, b) => a + b, 0);
+    const sumaDemanda = datos.demanda.reduce((a, b) => a + b, 0);
+    if (sumaOferta !== sumaDemanda) {
+        alert("La suma de la oferta debe ser igual a la suma de la demanda.");
+        return;
+    }
+
+    // Inicializar matrices y variables
+    const m = datos.origenes.length;  // número de filas (buses)
+    const n = datos.destinos.length; // número de columnas (destinos)
+    
+    // Matriz de solución
+    let solucion = Array(m).fill().map(() => Array(n).fill(0));
+    
+    // Copias de oferta y demanda para modificar
+    let ofertaRestante = [...datos.oferta];
+    let demandaRestante = [...datos.demanda];
+    
+    // Variables para el algoritmo
+    let i = 0, j = 0;
+    let pasos = [];
+    let pasoNumero = 1;
+
+    // Algoritmo de Esquina Noroeste
+    while (i < m && j < n) {
+        // Calcular la asignación (mínimo entre oferta y demanda)
+        let asignacion = Math.min(ofertaRestante[i], demandaRestante[j]);
+        
+        // Realizar la asignación
+        solucion[i][j] = asignacion;
+        
+        // Registrar el paso
+        let accion = "";
+        if (ofertaRestante[i] - asignacion === 0 && demandaRestante[j] - asignacion === 0) {
+            accion = "Oferta y demanda satisfechas - Mover diagonal";
+        } else if (ofertaRestante[i] - asignacion === 0) {
+            accion = "Oferta satisfecha - Mover abajo";
+        } else {
+            accion = "Demanda satisfecha - Mover derecha";
+        }
+        
+        pasos.push({
+            paso: pasoNumero,
+            posicion: `(${i + 1}, ${j + 1})`,
+            origen: datos.origenes[i],
+            destino: datos.destinos[j],
+            asignacion: asignacion,
+            ofertaAntes: ofertaRestante[i],
+            demandaAntes: demandaRestante[j],
+            ofertaDespues: ofertaRestante[i] - asignacion,
+            demandaDespues: demandaRestante[j] - asignacion,
+            accion: accion
+        });
+        
+        // Actualizar oferta y demanda
+        ofertaRestante[i] -= asignacion;
+        demandaRestante[j] -= asignacion;
+        
+        // Determinar siguiente movimiento
+        if (ofertaRestante[i] === 0 && demandaRestante[j] === 0) {
+            // Ambos son cero - mover diagonalmente
+            i++;
+            j++;
+        } else if (ofertaRestante[i] === 0) {
+            // Oferta agotada - mover a la siguiente fila
+            i++;
+        } else {
+            // Demanda satisfecha - mover a la siguiente columna
+            j++;
+        }
+        
+        pasoNumero++;
+    }
+
+    // Calcular costo total
+    let costoTotal = 0;
+    for (let i = 0; i < m; i++) {
+        for (let j = 0; j < n; j++) {
+            costoTotal += solucion[i][j] * datos.costos[i][j];
+        }
+    }
+
+    // Mostrar resultados
+    mostrarResultadosEsquinaNoroeste(solucion, pasos, costoTotal, datos);
+}
+// ... (mantener todas las funciones anteriores hasta EsquinaNoroeste)
+
+function mostrarResultadosEsquinaNoroeste(solucion, pasos, costoTotal, datos) {
+    let resultadoHTML = `
+        <div class="card mt-4">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <!-- Matriz Visual Estilo Imagen -->
+                
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered text-center" style="border: 2px solid #000;">
+                        <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                <th style="border: 2px solid #000; padding: 15px;"></th>`;
+
+    // Encabezados de destinos
+    datos.destinos.forEach(destino => {
+        resultadoHTML += `<th style="border: 2px solid #000; padding: 15px; font-weight: bold;">${destino}</th>`;
+    });
+    resultadoHTML += `<th style="border: 2px solid #000; padding: 15px; font-weight: bold;">OFERTA</th></tr></thead><tbody>`;
+
+    // Filas de la matriz con el diseño especial
+    for (let i = 0; i < datos.origenes.length; i++) {
+        resultadoHTML += `<tr><th style="border: 2px solid #000; padding: 15px; background-color: #f8f9fa; font-weight: bold;">${datos.origenes[i]}</th>`;
+        
+        for (let j = 0; j < datos.destinos.length; j++) {
+            const costo = datos.costos[i][j];
+            const asignacion = solucion[i][j];
+            
+            resultadoHTML += `<td style="border: 2px solid #000; padding: 0; position: relative; width: 100px; height: 80px;">`;
+            
+            if (asignacion > 0) {
+                // Celda con asignación (verde)
+                resultadoHTML += `
+                    <div style="position: relative; width: 100%; height: 100%; background-color: #d4edda;">
+                        <div style="position: absolute; top: 5px; left: 5px; font-size: 14px; font-weight: bold;">${costo}</div>
+                        <div style="position: absolute; bottom: 5px; right: 5px; font-size: 16px; font-weight: bold; color: #000;">${asignacion}</div>
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                             background: linear-gradient(135deg, transparent 40%, #000 40%, #000 42%, transparent 42%);">
+                        </div>
+                    </div>`;
+            } else {
+                // Celda sin asignación
+                resultadoHTML += `
+                    <div style="position: relative; width: 100%; height: 100%;">
+                        <div style="position: absolute; top: 5px; left: 5px; font-size: 14px;">${costo}</div>
+                        <div style="position: absolute; bottom: 5px; right: 5px; font-size: 16px; color: red; font-weight: bold;">X</div>
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                             background: linear-gradient(135deg, transparent 40%, #000 40%, #000 42%, transparent 42%);">
+                        </div>
+                    </div>`;
+            }
+            
+            resultadoHTML += `</td>`;
+        }
+        
+        resultadoHTML += `<td style="border: 2px solid #000; padding: 15px; font-weight: bold; background-color: #fff3cd;">${datos.oferta[i]}</td></tr>`;
+    }
+
+    // Fila de demanda
+    resultadoHTML += `<tr><th style="border: 2px solid #000; padding: 15px; background-color: #f8f9fa; font-weight: bold;">DEMANDAS</th>`;
+    datos.demanda.forEach(demanda => {
+        resultadoHTML += `<td style="border: 2px solid #000; padding: 15px; font-weight: bold; background-color: #fff3cd;">${demanda}</td>`;
+    });
+    
+    // Calcular totales
+    const totalOferta = datos.oferta.reduce((a, b) => a + b, 0);
+    const totalDemanda = datos.demanda.reduce((a, b) => a + b, 0);
+    
+    resultadoHTML += `<td style="border: 2px solid #000; padding: 15px;">
+                        <div style="position: relative; height: 40px;">
+                            <div style="position: absolute; top: 0; right: 5px; font-weight: bold;">${totalOferta}</div>
+                            <div style="position: absolute; bottom: 0; right: 5px; font-weight: bold;">${totalDemanda}</div>
+                            <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: #000; transform: translateY(-50%);"></div>
+                        </div>
+                      </td></tr>`;
+
+    resultadoHTML += `</tbody></table></div>`;
+
+    // Restricciones
+    resultadoHTML += generarRestricciones(datos);
+
+    // Cálculo del Costo Total
+    resultadoHTML += `
+                <h5>Cálculo del Costo Total</h5>
+                <div class="row">
+                    <div class="col-md-8">
+                        
+                        <div class="border p-3 bg-light">`;
+
+    let calculoDetallado = [];
+    let calculoTerminos = [];
+    for (let i = 0; i < datos.origenes.length; i++) {
+        for (let j = 0; j < datos.destinos.length; j++) {
+            if (solucion[i][j] > 0) {
+                calculoDetallado.push(`(${solucion[i][j]} × ${datos.costos[i][j]})`);
+                calculoTerminos.push(`${solucion[i][j] * datos.costos[i][j]}`);
+            }
+        }
+    }
+
+    resultadoHTML += `
+                            <p><strong>Desarrollo:</strong><br>
+                            Z = ${calculoDetallado.join(' + ')}<br>
+                            Z = ${calculoTerminos.join(' + ')}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-success text-center">
+                            <h4>Costo Total Mínimo</h4>
+                            <h2 class="text-success">$${costoTotal.toLocaleString()}</h2>
+                        </div>
+                    </div>
+                </div>`;
+
+    // Generar diagrama actualizado
+    resultadoHTML += `
+                <h5> Diagrama con unicas rutas posibles.</h5>
+                <div id="diagram-solucion" style="text-align: center; margin: 20px 0;">
+                    <svg id="diagram-solucion-svg" style="border: 1px solid #ccc; border-radius: 8px;"></svg>
+                </div>`;
+
+    // Botón para reiniciar
+    resultadoHTML += `
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary" onclick="reiniciarProblema()">
+                        🔄 Resolver Nuevo Problema
+                    </button>
+                </div>
+            </div>
+        </div>`;
+
+    // Insertar en el DOM
+    const contenedorResultados = document.getElementById("resultadosEsquinaNoroeste");
+    if (contenedorResultados) {
+        contenedorResultados.innerHTML = resultadoHTML;
+    } else {
+        const diagramContainer = document.getElementById("diagram-container2");
+        if (diagramContainer) {
+            const nuevoDiv = document.createElement('div');
+            nuevoDiv.id = "resultadosEsquinaNoroeste";
+            nuevoDiv.innerHTML = resultadoHTML;
+            diagramContainer.parentNode.insertBefore(nuevoDiv, diagramContainer.nextSibling);
+        }
+    }
+
+    // Generar el diagrama actualizado después de insertar el HTML
+    setTimeout(() => {
+        generarDiagramaSolucion(solucion, datos);
+    }, 100);
+
+    // Scroll hacia los resultados
+    document.getElementById("resultadosEsquinaNoroeste").scrollIntoView({ 
+        behavior: 'smooth' 
+    });
 }
 
+function generarRestricciones(datos) {
+    let restriccionesHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Función Objetivo:</h6>
+                <div class="border p-3 bg-light mb-3">`;
+    
+    // Función Objetivo
+    let terminosFO = [];
+    for (let i = 0; i < datos.origenes.length; i++) {
+        for (let j = 0; j < datos.destinos.length; j++) {
+            const cij = datos.costos[i][j];
+            terminosFO.push(`${cij}X<sub>${i + 1}${j + 1}</sub>`);
+        }
+    }
+    restriccionesHTML += `<strong>Min Z = ${terminosFO.join(' + ')}</strong>`;
+    
+    restriccionesHTML += `</div>
+                <h6>Restricciones de Oferta:</h6>
+                <div class="border p-3 bg-light">`;
+    
+    // Restricciones de oferta
+    for (let i = 0; i < datos.origenes.length; i++) {
+        let restr = "";
+        for (let j = 0; j < datos.destinos.length; j++) {
+            restr += `X<sub>${i + 1}${j + 1}</sub>`;
+            if (j < datos.destinos.length - 1) restr += " + ";
+        }
+        restr += ` ≤ ${datos.oferta[i]}`;
+        restriccionesHTML += restr + "<br>";
+    }
+    
+    restriccionesHTML += `</div>
+            </div>
+            <div class="col-md-6">
+                <h6>Restricciones de Demanda:</h6>
+                <div class="border p-3 bg-light">`;
+    
+    // Restricciones de demanda
+    for (let j = 0; j < datos.destinos.length; j++) {
+        let restr = "";
+        for (let i = 0; i < datos.origenes.length; i++) {
+            restr += `X<sub>${i + 1}${j + 1}</sub>`;
+            if (i < datos.origenes.length - 1) restr += " + ";
+        }
+        restr += ` = ${datos.demanda[j]}`;
+        restriccionesHTML += restr + "<br>";
+    }
+    
+    restriccionesHTML += `</div>
+                
+                <div class="border p-3 bg-light">
+                    <strong>X<sub>ij</sub> ≥ 0</strong>
+                </div>
+            </div>
+        </div>`;
+    
+    return restriccionesHTML;
+}
 
+function generarDiagramaSolucion(solucion, datos) {
+    const busColors = ["#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#B10DC9", "#FFDC00"];
+    
+    const numSources = datos.origenes.length;
+    const numDest = datos.destinos.length;
+    
+    const svg = document.getElementById('diagram-solucion-svg');
+    if (!svg) return;
+    
+    svg.innerHTML = '';
 
+    // Ajustes del diagrama
+    const element_spacing = 300;
+    const horizontalMargin = 120;
+    const baseHeight = 200;
+    
+    const maxElements = Math.max(numSources, numDest);
+    const diagramWidth = 1100;
+    const diagramHeight = (maxElements * element_spacing) + baseHeight - 300;
+    
+    svg.style.minHeight = `${diagramHeight}px`;
+    svg.setAttribute('viewBox', `0 0 ${diagramWidth} ${diagramHeight}`);
 
+    // Definir marcador de flecha
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    marker.setAttribute('id', 'arrow-solucion');
+    marker.setAttribute('viewBox', '0 0 10 10');
+    marker.setAttribute('refX', '9');
+    marker.setAttribute('refY', '5');
+    marker.setAttribute('markerWidth', '6');
+    marker.setAttribute('markerHeight', '6');
+    marker.setAttribute('orient', 'auto');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M0,0 L10,5 L0,10 Z');
+    path.setAttribute('fill', 'black');
+    marker.appendChild(path);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
 
+    // Posicionar elementos
+    const busPositions = Array.from({length: numSources}, (_, i) => ({
+        x: horizontalMargin,
+        y: baseHeight/2 + i * element_spacing
+    }));
+    
+    const cityPositions = Array.from({length: numDest}, (_, i) => ({
+        x: diagramWidth - horizontalMargin,
+        y: baseHeight/2 + i * element_spacing
+    }));
 
+    // Dibujar buses
+    busPositions.forEach((pos, i) => {
+        // Círculo para bus
+        const busCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        busCircle.setAttribute('cx', pos.x);
+        busCircle.setAttribute('cy', pos.y);
+        busCircle.setAttribute('r', '40');
+        busCircle.setAttribute('fill', '#87CEEB');
+        busCircle.setAttribute('stroke', '#000');
+        busCircle.setAttribute('stroke-width', '2');
+        svg.appendChild(busCircle);
+        
+        // Texto del bus
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos.x);
+        text.setAttribute('y', pos.y + 5);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-size', '12');
+        text.setAttribute('font-weight', 'bold');
+        text.textContent = datos.origenes[i];
+        svg.appendChild(text);
+        
+        // Oferta
+        const ofertaText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        ofertaText.setAttribute('x', pos.x);
+        ofertaText.setAttribute('y', pos.y + 60);
+        ofertaText.setAttribute('text-anchor', 'middle');
+        ofertaText.setAttribute('font-size', '14');
+        ofertaText.setAttribute('font-weight', 'bold');
+        ofertaText.setAttribute('fill', 'blue');
+        ofertaText.textContent = `Oferta: ${datos.oferta[i]}`;
+        svg.appendChild(ofertaText);
+    });
+
+    // Dibujar ciudades
+    cityPositions.forEach((pos, i) => {
+        // Círculo para ciudad
+        const cityCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        cityCircle.setAttribute('cx', pos.x);
+        cityCircle.setAttribute('cy', pos.y);
+        cityCircle.setAttribute('r', '40');
+        cityCircle.setAttribute('fill', '#FFB6C1');
+        cityCircle.setAttribute('stroke', '#000');
+        cityCircle.setAttribute('stroke-width', '2');
+        svg.appendChild(cityCircle);
+
+        // Texto de la ciudad
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos.x);
+        text.setAttribute('y', pos.y + 5);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-size', '12');
+        text.setAttribute('font-weight', 'bold');
+        text.textContent = datos.destinos[i];
+        svg.appendChild(text);
+        
+        // Demanda
+        const demandaText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        demandaText.setAttribute('x', pos.x);
+        demandaText.setAttribute('y', pos.y + 60);
+        demandaText.setAttribute('text-anchor', 'middle');
+        demandaText.setAttribute('font-size', '14');
+        demandaText.setAttribute('font-weight', 'bold');
+        demandaText.setAttribute('fill', 'red');
+        demandaText.textContent = `Demanda: ${datos.demanda[i]}`;
+        svg.appendChild(demandaText);
+    });
+
+    // Dibujar conexiones con valores
+    busPositions.forEach((busPos, busIdx) => {
+        cityPositions.forEach((cityPos, cityIdx) => {
+            const xij = solucion[busIdx][cityIdx];
+            const cij = datos.costos[busIdx][cityIdx];
+            
+            // Línea
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', busPos.x + 40);
+            line.setAttribute('y1', busPos.y);
+            line.setAttribute('x2', cityPos.x - 40);
+            line.setAttribute('y2', cityPos.y);
+            line.setAttribute('stroke', xij > 0 ? '#000' : '#ccc');
+            line.setAttribute('stroke-width', xij > 0 ? '3' : '1');
+            line.setAttribute('stroke-dasharray', xij > 0 ? 'none' : '5,5');
+            if (xij > 0) {
+                line.setAttribute('marker-end', 'url(#arrow-solucion)');
+            }
+            svg.appendChild(line);
+
+            // Calcular posiciones para las etiquetas
+            const midX = busPos.x + (cityPos.x - busPos.x) * 0.5;
+            const midY = busPos.y + (cityPos.y - busPos.y) * 0.5;
+            
+            // Offset para evitar solapamiento
+            const offsetY = (busIdx - cityIdx) * 15;
+
+            // Valor Xij (cantidad transportada)
+            if (xij > 0) {
+                const xijRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                xijRect.setAttribute('x', midX - 15);
+                xijRect.setAttribute('y', midY - 25 + offsetY);
+                xijRect.setAttribute('width', '30');
+                xijRect.setAttribute('height', '20');
+                xijRect.setAttribute('fill', '#90EE90');
+                xijRect.setAttribute('stroke', '#000');
+                xijRect.setAttribute('stroke-width', '1');
+                svg.appendChild(xijRect);
+                
+                const xijText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                xijText.setAttribute('x', midX);
+                xijText.setAttribute('y', midY - 10 + offsetY);
+                xijText.setAttribute('text-anchor', 'middle');
+                xijText.setAttribute('font-size', '12');
+                xijText.setAttribute('font-weight', 'bold');
+                xijText.textContent = `${xij}`;
+                svg.appendChild(xijText);
+            }
+
+            // Valor Cij (costo)
+            const cijRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            cijRect.setAttribute('x', midX - 15);
+            cijRect.setAttribute('y', midY + 5 + offsetY);
+            cijRect.setAttribute('width', '30');
+            cijRect.setAttribute('height', '20');
+            cijRect.setAttribute('fill', '#FFE4B5');
+            cijRect.setAttribute('stroke', '#000');
+            cijRect.setAttribute('stroke-width', '1');
+            svg.appendChild(cijRect);
+            
+            const cijText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            cijText.setAttribute('x', midX);
+            cijText.setAttribute('y', midY + 20 + offsetY);
+            cijText.setAttribute('text-anchor', 'middle');
+            cijText.setAttribute('font-size', '10');
+            cijText.textContent = `$${cij}`;
+            svg.appendChild(cijText);
+        });
+    });
+}
+
+// ... (mantener todas las demás funciones sin cambios)
+
+// Función para reiniciar el problema y permitir un nuevo cálculo
+function reiniciarProblema() {
+    // Recarga la página para limpiar todos los datos y la interfaz
+    location.reload();
+}
