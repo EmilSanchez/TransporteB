@@ -9,7 +9,7 @@ const capitals = [
 const busNames = [
     "Bolivariano", "Copetran", "Brasilia", "Rápido Ochoa", "Flota Magdalena", "Coomotor", "Cootranshuila",
     "Omega", "Palmira", "Flota La Macarena", "Flota Occidental", "San Gil", "Cootransbol", "Paz del Río",
-    "Sideral", "Gaviota", 
+    "Sideral", "Gaviota"
 ];
 
 
