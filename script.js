@@ -736,12 +736,13 @@ function generarRestricciones(datos) {
     
     // Restricciones de oferta
     for (let i = 0; i < datos.origenes.length; i++) {
-        let restr = "";
+    let restr = "";
         for (let j = 0; j < datos.destinos.length; j++) {
-            restr += `X<sub>${i + 1}${j + 1}</sub>`;
+            const costo = datos.costos[i][j];
+            restr += `${costo}X<sub>${i + 1}${j + 1}</sub>`;
             if (j < datos.destinos.length - 1) restr += " + ";
         }
-        restr += ` ≤ ${datos.oferta[i]}`;
+        restr += ` = ${datos.oferta[i]}`;
         restriccionesHTML += restr + "<br>";
     }
     
@@ -755,7 +756,8 @@ function generarRestricciones(datos) {
     for (let j = 0; j < datos.destinos.length; j++) {
         let restr = "";
         for (let i = 0; i < datos.origenes.length; i++) {
-            restr += `X<sub>${i + 1}${j + 1}</sub>`;
+            const costo = datos.costos[i][j];
+            restr += `${costo}X<sub>${i + 1}${j + 1}</sub>`;
             if (i < datos.origenes.length - 1) restr += " + ";
         }
         restr += ` = ${datos.demanda[j]}`;
