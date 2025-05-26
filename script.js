@@ -517,7 +517,7 @@ function EsquinaNoroeste() {
     let pasos = [];
     let pasoNumero = 1;
 
-    document.getElementById("generarDiagrama2").disabled = true;
+    
 
     while (i < m && j < n) {
         let asignacion = Math.min(ofertaRestante[i], demandaRestante[j]);
@@ -563,6 +563,7 @@ function EsquinaNoroeste() {
         
         pasoNumero++;
     }
+    document.getElementById("generarDiagrama2").disabled = true;
 
     // Calculamos costo total
     let costoTotal = 0;
@@ -574,6 +575,7 @@ function EsquinaNoroeste() {
 
     // Mostrar resultados
     mostrarResultadosEsquinaNoroeste(solucion, pasos, costoTotal, datos);
+    
 }
 
 function mostrarResultadosEsquinaNoroeste(solucion, pasos, costoTotal, datos) {
