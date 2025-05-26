@@ -138,7 +138,7 @@ function generarTablas() {
     for (let j = 0; j < totalDestinos; j++) {
         tablaHTML += `<td><input type="number" class="form-control form-control-sm" value="" onchange="calcularTotales()"/></td>`;
     }
-    // Cambio aquí: agregar divs para mostrar oferta y demanda por separado
+    // suma de oferta y demanda
     tablaHTML += `<td>
         <div style="border-bottom: 0.5px solid #AEAEAE; padding: 2px 0; margin-bottom: 2px;">
             <span id="sumaOferta" class="fw-bold">0</span>
@@ -153,7 +153,7 @@ function generarTablas() {
     document.getElementById("tablaGenerada").innerHTML = tablaHTML;
 }
 
-// Función para calcular y mostrar la suma de oferta y demanda
+// Funcion para calcular y mostrar la suma de oferta y demanda
 function calcularTotales() {
     let tabla = document.querySelector("#tablaGenerada table");
     if (!tabla) return;
@@ -162,7 +162,7 @@ function calcularTotales() {
     let sumaOferta = 0;
     let sumaDemanda = 0;
     
-    // Sumar oferta (última columna de cada fila excepto la última)
+    // Sumar oferta 
     for (let i = 0; i < filas.length - 1; i++) {
         let celdas = filas[i].querySelectorAll("td");
         let inputOferta = celdas[celdas.length - 1].querySelector("input");
@@ -171,7 +171,7 @@ function calcularTotales() {
         }
     }
     
-    // Sumar demanda (última fila, todas las columnas excepto la última)
+    // Sumar demanda
     let ultimaFila = filas[filas.length - 1].querySelectorAll("td");
     for (let j = 0; j < ultimaFila.length - 1; j++) {
         let inputDemanda = ultimaFila[j].querySelector("input");
@@ -180,7 +180,6 @@ function calcularTotales() {
         }
     }
     
-    // Mostrar las sumas por separado en la última celda
     let sumaOfertaElement = document.getElementById("sumaOferta");
     let sumaDemandaElement = document.getElementById("sumaDemanda");
     
@@ -241,21 +240,16 @@ function obtenerDatosTabla() {
 function generateDiagram() {
     const tabla = document.querySelector("#tablaGenerada table");
 
-    //traer oferta y demanda para validar que no sean 0 y sumen lo mismo
-    // Obtener datos de la tabla
     const datos = obtenerDatosTabla();
     if (!datos) {
         alert("Por favor, completa la tabla antes de continuar.");
         return;
     }
 
-    // Validar que ninguna oferta o demanda sea 0 o negativa
     if (datos.oferta.some(o => o <= 0) || datos.demanda.some(d => d <= 0)) {
         alert("Todas las ofertas y demandas deben ser mayores que 0.");
         return;
     }
-
-    // Validar que la suma de oferta y demanda sea igual
     const sumaOferta = datos.oferta.reduce((a, b) => a + b, 0);
     const sumaDemanda = datos.demanda.reduce((a, b) => a + b, 0);
     if (sumaOferta !== sumaDemanda) {
@@ -264,7 +258,6 @@ function generateDiagram() {
     }
 
     if (tabla) {
-        // Deshabilitar todos los inputs de costos, oferta y demanda
         const filas = tabla.querySelectorAll("tbody tr");
         for (let i = 0; i < filas.length - 1; i++) {
             const celdas = filas[i].querySelectorAll("td");
@@ -273,7 +266,6 @@ function generateDiagram() {
                 if (input) input.disabled = true;
             }
         }
-        // Deshabilitar inputs de demanda en la última fila
         const ultimaFila = filas[filas.length - 1].querySelectorAll("td");
         for (let j = 0; j < ultimaFila.length; j++) {
             const input = ultimaFila[j].querySelector("input");
@@ -297,11 +289,6 @@ function generateDiagram() {
     const cities = capitals.sort(() => 0.5 - Math.random()).slice(0, numDest);
     currentCities = cities;
 
-    if (numSources > 4 || numDest > 4) {
-        alert("como máximo 4 buses y 4 ciudades");
-        clearInput('num-sources', 'num-dest');
-        return;
-    }
     if (numSources < 1 || numDest < 1) {
         alert("debe haber al menos 1 bus y 1 ciudad");
         clearInput('num-sources', 'num-dest');
@@ -318,23 +305,18 @@ function generateDiagram() {
     const svg = document.getElementById('diagram-svg');
     svg.innerHTML = '';
 
-    // Ajustes clave -------------------------------------------------
-    const element_spacing = 300; // Más espacio entre elementos
-    const horizontalMargin = 80; // Margen lateral aumentado
-    const baseHeight = 200; // Altura base adicional
+    const element_spacing = 300;
+    const horizontalMargin = 80;
+    const baseHeight = 200;
     
-    // Calcular dimensiones dinámicas
     const maxElements = Math.max(numSources, numDest);
-    //console.log("elementos del diagrama"+ maxElements);
-    const diagramWidth = 1200; // Ancho aumentado
-    //console.log("ancho del diagrama "+diagramWidth);
+    const diagramWidth = 1200;
     const diagramHeight = (maxElements * element_spacing) + baseHeight - 300;
-    //console.log("alto del diagrama "+diagramHeight);
     
     svg.style.minHeight = `${diagramHeight}px`;
     svg.setAttribute('viewBox', `0 0 ${diagramWidth} ${diagramHeight}`);
 
-    // Definir marcador de flecha
+    // marcador de flecha
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
     marker.setAttribute('id', 'arrow');
@@ -351,7 +333,6 @@ function generateDiagram() {
     defs.appendChild(marker);
     svg.appendChild(defs);
 
-    // Posicionar elementos
     const busPositions = Array.from({length: numSources}, (_, i) => ({
         x: horizontalMargin,
         y: baseHeight/2 + i * element_spacing
@@ -362,48 +343,43 @@ function generateDiagram() {
         y: baseHeight/2 + i * element_spacing
     }));
 
-    // Dibujar buses
     busPositions.forEach((pos, i) => {
         const bus = document.createElementNS('http://www.w3.org/2000/svg', 'image');
         bus.setAttribute('href', 'img/bus.png'); //imagen 
-        bus.setAttribute('x', pos.x - 35); // Centrar icono
+        bus.setAttribute('x', pos.x - 35); 
         bus.setAttribute('y', pos.y - 60);
         bus.setAttribute('width', '100');
         bus.setAttribute('height', '100');
         svg.appendChild(bus);
         
-        // Texto
+
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        // Mostrar el mismo nombre de bus que aparece en la tabla generada
         text.setAttribute('x', pos.x - 20);
         text.setAttribute('y', pos.y - 40);
-        text.textContent = `${buses[i].nombre}`; // Mostrar el nombre del bus
+        text.textContent = `${buses[i].nombre}`; 
         svg.appendChild(text);
     });
 
-    // Dibujar ciudades
+
     cityPositions.forEach((pos, i) => {
-        // Ícono de ciudad
         const city = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-        city.setAttribute('href', 'img/ciudad.png'); // Asegurar que esta imagen existe
-        city.setAttribute('x', pos.x - 30); // Centrar icono
+        city.setAttribute('href', 'img/ciudad.png');
+        city.setAttribute('x', pos.x - 30); 
         city.setAttribute('y', pos.y - 60);
         city.setAttribute('width', '100');
         city.setAttribute('height', '100');
         svg.appendChild(city);
 
-        // Nombre de la ciudad
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         text.setAttribute('x', pos.x - 0);
         text.setAttribute('y', pos.y - 55);
-        text.textContent = `${destinos[i].nombre}`; // Mostrar el nombre de la ciudad
+        text.textContent = `${destinos[i].nombre}`; 
         svg.appendChild(text);
     });
 
     const labelOffset = 40; // Distancia desde la línea
     const angleOffset = 25; // Ángulo para evitar colisiones
 
-    // Dibujar conexiones
     busPositions.forEach((busPos, busIdx) => {
         cityPositions.forEach((cityPos, cityIdx) => {
             // Línea
@@ -421,7 +397,7 @@ function generateDiagram() {
             const dy = cityPos.y - busPos.y;
             const angle = Math.atan2(dy, dx);
 
-            // Posicionamiento inteligente de etiquetas
+            // Posicionamiento 
             const xijPosition = {
                 x: busPos.x + dx * 0.25 + Math.cos(angle + angleOffset) * labelOffset,
                 y: busPos.y + dy * 0.25 + Math.sin(angle + angleOffset) * labelOffset
@@ -432,15 +408,14 @@ function generateDiagram() {
                 y: busPos.y + dy * 0.75 + Math.sin(angle - angleOffset) * labelOffset
             };
 
-            // Crear etiquetas con posición calculada
             const xId = `x${busIdx+1}${cityIdx+1}`;
             const cId = `c${busIdx+1}${cityIdx+1}`;
 
-            // Modificar las llamadas a createLabel para incluir los valores iniciales
+            
             createLabel(svg, `${xId}`, xijPosition, busColors[busIdx % busColors.length]);
             createLabel(svg, `${cId}`, cijPosition, busColors[busIdx % busColors.length]);
 
-            // Si necesitas almacenar valores para esta ruta, puedes hacerlo aquí si es necesario
+           
         });
     });
     
@@ -518,13 +493,11 @@ function EsquinaNoroeste() {
         return;
     }
 
-    // Validar que ninguna oferta o demanda sea 0 o negativa
     if (datos.oferta.some(o => o <= 0) || datos.demanda.some(d => d <= 0)) {
         alert("Todas las ofertas y demandas deben ser mayores que 0.");
         return;
     }
 
-    // Validar que la suma de oferta y demanda sea igual
     const sumaOferta = datos.oferta.reduce((a, b) => a + b, 0);
     const sumaDemanda = datos.demanda.reduce((a, b) => a + b, 0);
     if (sumaOferta !== sumaDemanda) {
@@ -532,33 +505,25 @@ function EsquinaNoroeste() {
         return;
     }
 
-    // Inicializar matrices y variables
     const m = datos.origenes.length;  // filas 
     const n = datos.destinos.length; // columnas 
     
-    // Matriz de solución
     let solucion = Array(m).fill().map(() => Array(n).fill(0));
     
-    // Copias de oferta y demanda para modificar
     let ofertaRestante = [...datos.oferta];
     let demandaRestante = [...datos.demanda];
     
-    // Variables para el algoritmo
     let i = 0, j = 0;
     let pasos = [];
     let pasoNumero = 1;
 
     document.getElementById("generarDiagrama2").disabled = true;
 
-    // Algoritmo de Esquina Noroeste
     while (i < m && j < n) {
-        // Calcular la asignación (mínimo entre oferta y demanda)
         let asignacion = Math.min(ofertaRestante[i], demandaRestante[j]);
         
-        // Realizar la asignación
         solucion[i][j] = asignacion;
         
-        // Registrar el paso
         let accion = "";
         if (ofertaRestante[i] - asignacion === 0 && demandaRestante[j] - asignacion === 0) {
             accion = "Oferta y demanda satisfechas - Mover diagonal";
@@ -581,11 +546,9 @@ function EsquinaNoroeste() {
             accion: accion
         });
         
-        // Actualizar oferta y demanda
         ofertaRestante[i] -= asignacion;
         demandaRestante[j] -= asignacion;
         
-        // Determinar siguiente movimiento
         if (ofertaRestante[i] === 0 && demandaRestante[j] === 0) {
             // Ambos son cero - mover diagonalmente
             i++;
@@ -601,7 +564,7 @@ function EsquinaNoroeste() {
         pasoNumero++;
     }
 
-    // Calcular costo total
+    // Calculamos costo total
     let costoTotal = 0;
     for (let i = 0; i < m; i++) {
         for (let j = 0; j < n; j++) {
@@ -627,13 +590,12 @@ function mostrarResultadosEsquinaNoroeste(solucion, pasos, costoTotal, datos) {
                             <tr style="background-color: #f8f9fa;">
                                 <th style="border: 2px solid #000; padding: 15px;"></th>`;
 
-    // Encabezados de destinos
     datos.destinos.forEach(destino => {
         resultadoHTML += `<th style="border: 2px solid #000; padding: 15px; font-weight: bold;">${destino}</th>`;
     });
     resultadoHTML += `<th style="border: 2px solid #000; padding: 15px; font-weight: bold;">OFERTA</th></tr></thead><tbody>`;
 
-    // Filas de la matriz con el diseño especial
+
     for (let i = 0; i < datos.origenes.length; i++) {
         resultadoHTML += `<tr><th style="border: 2px solid #000; padding: 15px; background-color: #f8f9fa; font-weight: bold;">${datos.origenes[i]}</th>`;
         
@@ -1029,3 +991,5 @@ function generarDiagramaSolucion(solucion, datos) {
 function reiniciarProblema() {
     location.reload();
 }
+
+// Codigo terminado porfiiin, hecho por Emil Sanctiago Sanchez Ropero y Camilo Reyes Rodriguez
